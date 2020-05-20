@@ -1,9 +1,8 @@
 import os
-from flask import Flask, request, flash, redirect, url_for
+from flask import Flask, request, flash, redirect, url_for, render_template
 from werkzeug.utils import secure_filename
 import pymongo
 import vcf
-from app.vcf_reader import main
 
 app = Flask(__name__)
 
@@ -56,4 +55,4 @@ def read_vcf(vcfpath):
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')
