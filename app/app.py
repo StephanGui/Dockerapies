@@ -1,12 +1,14 @@
 import os
-from flask import Flask, request, flash, redirect, url_for, render_template
+import sys
+from flask import Flask, request, flash, redirect, url_for, render_template, send_from_directory
 from werkzeug.utils import secure_filename
 import pymongo
 import vcf
 
 app = Flask(__name__)
 
-ALLOWED_EXTENSIONS = {'.vcf'}
+UPLOAD_FOLDER = "Uploaded_vcfs"
+ALLOWED_EXTENSIONS = {'vcf'}
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -17,17 +19,20 @@ def receive_file():
             flash('No file part')
             return redirect(request.url)
         file = request.files['file']
+        print(file, flush=True)
         # if user does not select file, browser also
         # submit an empty part without filename
         if file.filename == '':
             flash('No selected file')
             return redirect(request.url)
-        if file and allowed_file(file.filename) and vcf.Reader(file):
+
+        if file and allowed_file(file.filename):  # and vcf.Reader(open(file.stream, 'r'))
             filename = secure_filename(file.filename)
-            # file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            print(os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename))
+            file.save(os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename))
             main_flow(file)
-            return redirect(url_for('uploaded_file',
-                                    filename=filename))
+            # return redirect(url_for('uploaded_file',
+            #                         filename=filename))
     return '''
         <!doctype html>
         <title>Upload new File</title>
@@ -45,14 +50,24 @@ def allowed_file(filename):
 
 
 def main_flow(vcf_file):
-    read_vcf("/home/sander/Desktop/WinLinShare/example.vcf")
+    read_vcf(vcf_file)
 
 
 def read_vcf(vcfpath):
-    vcf_reader = vcf.Reader(open(vcfpath, 'r'))
+    print(vcfpath, flush=True)
+    vcf_reader = vcf.Reader(open(os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], vcfpath.filename), 'r'))
     for record in vcf_reader:
-        print(record.INFO['NS'])
+        print(record.ALT, flush=True)
+
+
+@app.route('/banaan', methods=['GET'])
+def banana():
+    print('This is standard output', flush=True)
+    sys.stdout.flush()
+    return render_template("index.html")
 
 
 if __name__ == '__main__':
+    # app.config['SESSION_TYPE'] = 'filesystem'
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
     app.run(host='0.0.0.0')
