@@ -2,11 +2,12 @@ import os
 import sys
 from flask import Flask, request, flash, redirect, url_for, render_template, send_from_directory
 from werkzeug.utils import secure_filename
-import pymongo
+from pymongo import MongoClient
 import vcf
 
 app = Flask(__name__)
-
+client = MongoClient("mongodb://root:example@db:27017")
+db = client.test_DB
 UPLOAD_FOLDER = "Uploaded_vcfs"
 ALLOWED_EXTENSIONS = {'vcf'}
 
@@ -60,11 +61,19 @@ def read_vcf(vcfpath):
         print(record.ALT, flush=True)
 
 
-@app.route('/banaan', methods=['GET'])
-def banana():
-    print('This is standard output', flush=True)
-    sys.stdout.flush()
+@app.route('/home_page')
+def home_page():
+    print(db.list_collection_names(), file=sys.stderr)
     return render_template("index.html")
+
+
+@app.route('/banaan')
+def hello_world():
+    item_doc = {
+        'name': request.form['name'],
+        'description': request.form['description']
+    }
+    return redirect(url_for('home_page'))
 
 
 if __name__ == '__main__':
