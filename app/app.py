@@ -1,21 +1,25 @@
-from flask import Flask, render_template
-from flask_pymongo import PyMongo
-import json
+from flask import Flask, render_template, request, redirect, url_for
+from pymongo import MongoClient
+import sys
+
 
 app = Flask(__name__)
-app.config["MONGO_URI"] = "mongodb://localhost:27017/myDatabase"
-mongo = PyMongo(app)
+client = MongoClient("mongodb://root:example@db:27017")
+db = client.test_DB
 
 @app.route('/')
 def home_page():
-    online_users = mongo.db.users.find({"online": True})
-    return render_template("index.html",
-        online_users=online_users)
+    print(db.list_collection_names(), file=sys.stderr)
+    return render_template("index.html")
 
 @app.route('/banaan')
 def hello_world():
-    print("banaan")
-    return render_template('index.html')
+    item_doc= {
+        'name': request.form['name'],
+        'description': request.form['description']
+    }
+    return redirect(url_for('home_page'))
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
