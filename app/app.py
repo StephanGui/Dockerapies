@@ -4,10 +4,11 @@ from flask import Flask, request, flash, redirect, url_for, render_template, sen
 from werkzeug.utils import secure_filename
 from pymongo import MongoClient
 import vcf
+import json
 
 app = Flask(__name__)
 client = MongoClient("mongodb://spider:man@db:27017")
-db = client.Allele_variant_DB
+db = client.Allele_variant_DB.Variants
 UPLOAD_FOLDER = "Uploaded_vcfs"
 ALLOWED_EXTENSIONS = {'vcf'}
 
@@ -31,9 +32,9 @@ def receive_file():
             filename = secure_filename(file.filename)
             print(os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename))
             file.save(os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename))
-            main_flow(file)
-            # return redirect(url_for('uploaded_file',
-            #                         filename=filename))
+            vcf_dict = filter_vcf(file)
+            return json.dumps(vcf_dict)
+
     return '''
         <!doctype html>
         <title>Upload new File</title>
@@ -50,30 +51,18 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def main_flow(vcf_file):
-    read_vcf(vcf_file)
-
-
-def read_vcf(vcfpath):
+def filter_vcf(vcfpath):
     print(vcfpath, flush=True)
     vcf_reader = vcf.Reader(open(os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], vcfpath.filename), 'r'))
+    new_vcflist = {}
     for record in vcf_reader:
-        print(record.ALT, flush=True)
+        entry = {"CHROM": record.CHROM, "POS": record.POS, "REF": record.REF, "ALT": str(record.ALT[0])}
 
-
-@app.route('/home_page')
-def home_page():
-    print(db.list_collection_names(), file=sys.stderr)
-    return render_template("index.html")
-
-
-@app.route('/banaan')
-def hello_world():
-    item_doc = {
-        'name': request.form['name'],
-        'description': request.form['description']
-    }
-    return redirect(url_for('home_page'))
+        cursor = db.find(entry)
+        print(40*"-", "\n", "cursor: ", cursor, "\n", "entry: ", entry, flush=True)
+        if cursor:
+            new_vcflist.update(entry)
+    return new_vcflist
 
 
 if __name__ == '__main__':
