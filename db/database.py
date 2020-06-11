@@ -2,11 +2,9 @@ from pymongo import MongoClient
 import vcf
 import os
 
-
 myclient = MongoClient("mongodb://spider:man@localhost:27017")
 mydb = myclient["Allele_variant_DB"]
 mycol = mydb["Variants"]
-
 
 def vcf_parser():
     vcf_reader = vcf.Reader(open(os.path.join(os.path.split(os.path.abspath(__file__))[0], "gnomad_test.vcf"), 'r'))
