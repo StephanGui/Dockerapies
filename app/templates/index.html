@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hoi het werkt</title>
+</head>
+<body>
+    <form action="/banaan" method="POST">
+        <input type="text" name="name"></input>
+        <input type="text" name="description"></input>
+        <input type="submit"></input>
+    </form>
+</body>
+    {% for item in items %}
+    <h1> {{ item.name }} </h1>
+    <p> {{ item.description }}</p>
+     {% endfor %}
+</html>
