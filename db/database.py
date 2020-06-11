@@ -1,7 +1,6 @@
 from pymongo import MongoClient
 import vcf
 import os
-import sys
 
 myclient = MongoClient("mongodb://spider:man@localhost:27017")
 mydb = myclient["Allele_variant_DB"]

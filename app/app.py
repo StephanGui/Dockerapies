@@ -1,6 +1,5 @@
 import os
-import sys
-from flask import Flask, request, flash, redirect, url_for, render_template, send_from_directory, abort
+from flask import Flask, request, flash, redirect, abort
 from werkzeug.utils import secure_filename
 from pymongo import MongoClient
 import vcf
@@ -25,8 +24,6 @@ def receive_file():
             flash('No file part')
             return redirect(request.url)
         file = request.files['file']
-        print(file, flush=True)
-        # if user does not select file, browser also
         # submit an empty part without filename
         if file.filename == '':
             flash('No selected file')
@@ -64,6 +61,7 @@ def receive_file_https(filename):
     if not allowed_file(filename):
         abort(400, "only vcf files allowed as input")
 
+    # write data to local vcf file
     with open(os.path.join(UPLOAD_FOLDER, filename), "wb") as fp:
         fp.write(request.data)
 
@@ -71,18 +69,17 @@ def receive_file_https(filename):
     return json.dumps(vcf_dict)
 
 
+# Accept filename and return dictionary containing filtered vcs
 def filter_vcf(vcf_filename):
     vcf_reader = vcf.Reader(open(os.path.join(app.config['UPLOAD_FOLDER'], vcf_filename), 'r'))
     new_vcflist = {}
     for i, record in enumerate(vcf_reader):
         entry = {"CHROM": record.CHROM, "POS": record.POS, "REF": record.REF, "ALT": str(record.ALT[0])}
-        cursor = db.find_one(entry)
-        if cursor is not None:
+        if db.find_one(entry) is not None:
             new_vcflist[str(i)] = entry
     return new_vcflist
 
 
 if __name__ == '__main__':
-    # app.config['SESSION_TYPE'] = 'filesystem'
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
     app.run(host='0.0.0.0')
