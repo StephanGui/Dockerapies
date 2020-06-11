@@ -6,7 +6,7 @@ from pymongo import MongoClient
 import vcf
 
 app = Flask(__name__)
-client = MongoClient("mongodb://root:example@db:27017")
+client = MongoClient("mongodb://spider:man@db:27017")
 db = client.Allele_variant_DB
 UPLOAD_FOLDER = "Uploaded_vcfs"
 ALLOWED_EXTENSIONS = {'vcf'}
