@@ -5,18 +5,18 @@ from pymongo import MongoClient
 import vcf
 import json
 
-app = Flask(__name__)
+api = Flask(__name__)
 client = MongoClient("mongodb://spider:man@db:27017")
 db = client.Allele_variant_DB.Variants
 
-UPLOAD_FOLDER = os.path.join(app.root_path, "Uploaded_vcfs")
+UPLOAD_FOLDER = os.path.join(api.root_path, "Uploaded_vcfs")
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 ALLOWED_EXTENSIONS = {'vcf'}
 
 
-@app.route('/', methods=['GET', 'POST'])
+@api.route('/', methods=['GET', 'POST'])
 def receive_file():
     if request.method == 'POST':
         # check if the post request has the file part
@@ -31,7 +31,7 @@ def receive_file():
 
         if file and allowed_file(file.filename):  # and vcf.Reader(open(file.stream, 'r'))
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            file.save(os.path.join(api.config['UPLOAD_FOLDER'], filename))
             vcf_dict = filter_vcf(file.filename)
             return json.dumps(vcf_dict)
 
@@ -51,7 +51,7 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@app.route("/receive/<filename>", methods=["POST"])
+@api.route("/receive/<filename>", methods=["POST"])
 def receive_file_https(filename):
     """Upload a file."""
 
@@ -71,7 +71,7 @@ def receive_file_https(filename):
 
 # Accept filename and return dictionary containing filtered vcs
 def filter_vcf(vcf_filename):
-    vcf_reader = vcf.Reader(open(os.path.join(app.config['UPLOAD_FOLDER'], vcf_filename), 'r'))
+    vcf_reader = vcf.Reader(open(os.path.join(api.config['UPLOAD_FOLDER'], vcf_filename), 'r'))
     new_vcflist = {}
     for i, record in enumerate(vcf_reader):
         entry = {"CHROM": record.CHROM, "POS": record.POS, "REF": record.REF, "ALT": str(record.ALT[0])}
@@ -81,5 +81,5 @@ def filter_vcf(vcf_filename):
 
 
 if __name__ == '__main__':
-    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-    app.run(host='0.0.0.0')
+    api.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+    api.run(host='0.0.0.0')
