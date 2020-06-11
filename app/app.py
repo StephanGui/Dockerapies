@@ -55,13 +55,11 @@ def filter_vcf(vcfpath):
     print(vcfpath, flush=True)
     vcf_reader = vcf.Reader(open(os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], vcfpath.filename), 'r'))
     new_vcflist = {}
-    for record in vcf_reader:
+    for i, record in enumerate(vcf_reader):
         entry = {"CHROM": record.CHROM, "POS": record.POS, "REF": record.REF, "ALT": str(record.ALT[0])}
-
-        cursor = db.find(entry)
-        print(40*"-", "\n", "cursor: ", cursor, "\n", "entry: ", entry, flush=True)
-        if cursor:
-            new_vcflist.update(entry)
+        cursor = db.find_one(entry)
+        if cursor is not None:
+            new_vcflist[str(i)] = entry
     return new_vcflist
 
 
