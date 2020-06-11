@@ -9,6 +9,8 @@ import json
 app = Flask(__name__)
 client = MongoClient("mongodb://spider:man@db:27017")
 db = client.Allele_variant_DB.Variants
+
+os.makedirs(os.path.join(app.root_path, "Uploaded_vcfs"))
 UPLOAD_FOLDER = "Uploaded_vcfs"
 ALLOWED_EXTENSIONS = {'vcf'}
 
