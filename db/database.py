@@ -12,7 +12,6 @@ def vcf_parser():
     vcf_reader = vcf.Reader(open(os.path.join(os.path.split(os.path.abspath(__file__))[0], "gnomad_test.vcf"), 'r'))
     return vcf_reader
 
-
 def filter_records(vcf_reader):
     list_of_dict = []
     for record in vcf_reader:
@@ -34,6 +33,11 @@ def fill_dictionary(list_of_dict):
 
 
 if __name__ == "__main__":
-    vcf_reader = vcf_parser()
-    list_of_dict = filter_records(vcf_reader)
-    fill_dictionary(list_of_dict)
+    try:
+        vcf_reader = vcf_parser()
+        list_of_dict = filter_records(vcf_reader)
+        fill_dictionary(list_of_dict)
+    except TypeError:
+        print("Het document bevat geen lijsten of is niet het juiste formaat")
+    except FileNotFoundError:
+        print("Het bestand bestaat niet")
