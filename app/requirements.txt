@@ -6,6 +6,6 @@ biopython==1.76
 click==7.1.2
 itsdangerous==1.1.0
 numpy==1.18.4
-pip==19.0.3
+pip==19.2
 pymongo==3.10.1
 PyVCF==0.6.8
