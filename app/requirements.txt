@@ -5,7 +5,7 @@ Werkzeug==1.0.1
 biopython==1.76
 click==7.1.2
 itsdangerous==1.1.0
-numpy==1.18.4
+numpy==1.22.0
 pip==19.0.3
 pymongo==3.10.1
 PyVCF==0.6.8
